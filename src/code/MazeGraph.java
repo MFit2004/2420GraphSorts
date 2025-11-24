@@ -1,3 +1,5 @@
+package a5;
+
 import edu.princeton.cs.algs4.Graph;
 
 public class MazeGraph {
