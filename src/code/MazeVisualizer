@@ -1,0 +1,226 @@
+package a5;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.*;
+
+public class MazeVisualizer extends JPanel {
+    private MazeGraph mazeGraph;
+    private int gridSize;
+    private int cellSize = 40;
+    private int startVertex;
+    private int targetVertex;
+    
+    private java.util.List<Integer> dfsPath;
+    private java.util.List<Integer> bfsPath;
+    private int dfsCurrentIndex = 0;
+    private int bfsCurrentIndex = 0;
+    private boolean dfsFinished = false;
+    private boolean bfsFinished = false;
+    
+    private static final Color BG_COLOR = new Color(240, 240, 240);
+    private static final Color WALL_COLOR = new Color(50, 50, 50);
+    private static final Color START_COLOR = new Color(0, 200, 0);
+    private static final Color TARGET_COLOR = new Color(200, 0, 0);
+    private static final Color DFS_COLOR = new Color(255, 100, 100);
+    private static final Color BFS_COLOR = new Color(100, 100, 255);
+    private static final Color DFS_TRAIL_COLOR = new Color(255, 200, 200);
+    private static final Color BFS_TRAIL_COLOR = new Color(200, 200, 255);
+    
+    public MazeVisualizer(MazeGraph mazeGraph, int start, int target) {
+        this.mazeGraph = mazeGraph;
+        this.gridSize = mazeGraph.getGridSize();
+        this.startVertex = start;
+        this.targetVertex = target;
+        this.dfsPath = new ArrayList<>();
+        this.bfsPath = new ArrayList<>();
+        
+        setPreferredSize(new Dimension(gridSize * cellSize + 400, gridSize * cellSize + 100));
+        setBackground(BG_COLOR);
+    }
+    
+    public void setDFSPath(java.util.List<Integer> path) {
+        this.dfsPath = new ArrayList<>(path);
+        this.dfsCurrentIndex = 0;
+        this.dfsFinished = false;
+    }
+    
+    public void setBFSPath(java.util.List<Integer> path) {
+        this.bfsPath = new ArrayList<>(path);
+        this.bfsCurrentIndex = 0;
+        this.bfsFinished = false;
+    }
+    
+    public void advanceDFS() {
+        if (dfsCurrentIndex < dfsPath.size() - 1) {
+            dfsCurrentIndex++;
+        } else {
+            dfsFinished = true;
+        }
+        repaint();
+    }
+    
+    public void advanceBFS() {
+        if (bfsCurrentIndex < bfsPath.size() - 1) {
+            bfsCurrentIndex++;
+        } else {
+            bfsFinished = true;
+        }
+        repaint();
+    }
+    
+    public boolean isDFSFinished() {
+        return dfsFinished;
+    }
+    
+    public boolean isBFSFinished() {
+        return bfsFinished;
+    }
+    
+    public boolean bothFinished() {
+        return dfsFinished && bfsFinished;
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        int leftOffset = 50;
+        int topOffset = 50;
+        
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.BOLD, 24));
+        g2d.drawString("ALGORITHM RACE", leftOffset, 30);
+        
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                int x = leftOffset + j * cellSize;
+                int y = topOffset + i * cellSize;
+                
+                g2d.setColor(Color.WHITE);
+                g2d.fillRect(x, y, cellSize, cellSize);
+                g2d.setColor(WALL_COLOR);
+                g2d.drawRect(x, y, cellSize, cellSize);
+            }
+        }
+        
+        g2d.setStroke(new BasicStroke(3));
+        for (int i = 0; i < dfsCurrentIndex; i++) {
+            int[] from = mazeGraph.vertexToCoordinates(dfsPath.get(i));
+            int[] to = mazeGraph.vertexToCoordinates(dfsPath.get(i + 1));
+            
+            int x1 = leftOffset + from[1] * cellSize + cellSize / 2;
+            int y1 = topOffset + from[0] * cellSize + cellSize / 2;
+            int x2 = leftOffset + to[1] * cellSize + cellSize / 2;
+            int y2 = topOffset + to[0] * cellSize + cellSize / 2;
+            
+            g2d.setColor(DFS_TRAIL_COLOR);
+            g2d.drawLine(x1, y1, x2, y2);
+        }
+        
+        for (int i = 0; i < bfsCurrentIndex; i++) {
+            int[] from = mazeGraph.vertexToCoordinates(bfsPath.get(i));
+            int[] to = mazeGraph.vertexToCoordinates(bfsPath.get(i + 1));
+            
+            int x1 = leftOffset + from[1] * cellSize + cellSize / 2;
+            int y1 = topOffset + from[0] * cellSize + cellSize / 2;
+            int x2 = leftOffset + to[1] * cellSize + cellSize / 2;
+            int y2 = topOffset + to[0] * cellSize + cellSize / 2;
+            
+            g2d.setColor(BFS_TRAIL_COLOR);
+            g2d.drawLine(x1, y1, x2, y2);
+        }
+        
+        int[] startCoord = mazeGraph.vertexToCoordinates(startVertex);
+        int[] targetCoord = mazeGraph.vertexToCoordinates(targetVertex);
+        
+        g2d.setColor(START_COLOR);
+        g2d.fillOval(leftOffset + startCoord[1] * cellSize + 5, 
+                     topOffset + startCoord[0] * cellSize + 5, 
+                     cellSize - 10, cellSize - 10);
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 14));
+        g2d.drawString("S", leftOffset + startCoord[1] * cellSize + cellSize/2 - 5, 
+                       topOffset + startCoord[0] * cellSize + cellSize/2 + 5);
+        
+        g2d.setColor(TARGET_COLOR);
+        g2d.fillOval(leftOffset + targetCoord[1] * cellSize + 5, 
+                     topOffset + targetCoord[0] * cellSize + 5, 
+                     cellSize - 10, cellSize - 10);
+        g2d.setColor(Color.WHITE);
+        g2d.drawString("T", leftOffset + targetCoord[1] * cellSize + cellSize/2 - 5, 
+                       topOffset + targetCoord[0] * cellSize + cellSize/2 + 5);
+        
+        if (dfsCurrentIndex < dfsPath.size() && !dfsFinished) {
+            int[] dfsPos = mazeGraph.vertexToCoordinates(dfsPath.get(dfsCurrentIndex));
+            g2d.setColor(DFS_COLOR);
+            g2d.fillOval(leftOffset + dfsPos[1] * cellSize + 8, 
+                         topOffset + dfsPos[0] * cellSize + 8, 
+                         cellSize - 16, cellSize - 16);
+        }
+        
+        if (bfsCurrentIndex < bfsPath.size() && !bfsFinished) {
+            int[] bfsPos = mazeGraph.vertexToCoordinates(bfsPath.get(bfsCurrentIndex));
+            g2d.setColor(BFS_COLOR);
+            g2d.fillOval(leftOffset + bfsPos[1] * cellSize + 8, 
+                         topOffset + bfsPos[0] * cellSize + 8, 
+                         cellSize - 16, cellSize - 16);
+        }
+        
+        int legendX = leftOffset + gridSize * cellSize + 30;
+        int legendY = topOffset;
+        
+        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("LEGEND", legendX, legendY);
+        
+        legendY += 30;
+        g2d.setColor(DFS_COLOR);
+        g2d.fillRect(legendX, legendY, 20, 20);
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        g2d.drawString("DFS", legendX + 30, legendY + 15);
+        
+        legendY += 30;
+        g2d.setColor(BFS_COLOR);
+        g2d.fillRect(legendX, legendY, 20, 20);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("BFS", legendX + 30, legendY + 15);
+        
+        legendY += 30;
+        g2d.setColor(START_COLOR);
+        g2d.fillRect(legendX, legendY, 20, 20);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("Start", legendX + 30, legendY + 15);
+        
+        legendY += 30;
+        g2d.setColor(TARGET_COLOR);
+        g2d.fillRect(legendX, legendY, 20, 20);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("Target", legendX + 30, legendY + 15);
+        
+        legendY += 50;
+        g2d.setFont(new Font("Arial", Font.BOLD, 14));
+        g2d.drawString("PROGRESS", legendX, legendY);
+        
+        legendY += 25;
+        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+        g2d.setColor(DFS_COLOR);
+        String dfsStatus = dfsFinished ? "FINISHED!" : dfsCurrentIndex + "/" + (dfsPath.size() - 1);
+        g2d.drawString("DFS: " + dfsStatus, legendX, legendY);
+        
+        legendY += 20;
+        g2d.setColor(BFS_COLOR);
+        String bfsStatus = bfsFinished ? "FINISHED!" : bfsCurrentIndex + "/" + (bfsPath.size() - 1);
+        g2d.drawString("BFS: " + bfsStatus, legendX, legendY);
+        
+        if (bothFinished()) {
+            legendY += 40;
+            g2d.setFont(new Font("Arial", Font.BOLD, 18));
+            g2d.setColor(new Color(255, 215, 0));
+            g2d.drawString("RACE COMPLETE!", legendX - 20, legendY);
+        }
+    }
+}
