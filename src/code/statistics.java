@@ -1,3 +1,5 @@
+package a5;
+
 public class Statistics {
     // Inner Timer class
     private class Timer {
