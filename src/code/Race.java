@@ -1,3 +1,5 @@
+package a5;
+
 import edu.princeton.cs.algs4.DepthFirstPaths;
 import edu.princeton.cs.algs4.BreadthFirstPaths;
 import javax.swing.*;
