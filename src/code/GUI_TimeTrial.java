@@ -1,3 +1,5 @@
+package a5;
+
 import java.util.Scanner;
 
 public class GUI_TimeTrial {
