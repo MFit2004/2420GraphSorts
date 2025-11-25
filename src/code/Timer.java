@@ -1,40 +1,50 @@
 package code;
 
 /**
- * Provide an object to time Algorithm running
+ * @author Matthew_Fitzgerald
+ * @course CS-2420-001 Algorithms & Data Structures Fall 2025
+ * @last_modified Nov 24, 2025
+ * @assignment Team Project:
+ * 				Algorithm Racing
+ * @description updates to timer object 	
+ * 			(neccessary for accuracy and stopwatch)
  */
 public class Timer {
-	private static long start = 0;
-	private static long stop = 0;
+    private long start = 0;     
+    private long elapsed = 0;   
+    private boolean running = false;
 
-	/**
-	 * initialize Timer Object
-	 */
-	public Timer() {
-		
-	}
-	
-	/**
-	 * start the Timer
-	 */
-	public void Start() {
-		start = System.nanoTime();
-	}
-	
-	/**
-	 * Stop the Timer
-	 */
-	public void Stop() {
-		stop = System.nanoTime();
-	}
-	/**
-	 * Current time meant to be called repeatedly 
-	 * @return time difference from start to stop,
-	 * in Nanoseconds (ns)
-	 */
-	public long getTime() {
-		stop = System.nanoTime();
-		return stop - start;
-	}
-	
+    public void Start() {
+        if (!running) {
+            start = System.nanoTime();
+            running = true;
+        }
+    }
+
+    public void Stop() {
+        if (running) {
+            elapsed += System.nanoTime() - start; 
+            running = false;
+        }
+    }
+
+    /**
+     * Check time
+     * TODO: needed?
+     */
+    public long getTime() {
+        if (running) {
+            return elapsed + (System.nanoTime() - start); 
+        }
+        return elapsed; 
+    }
+
+    /**
+     * TODO: needed?
+     */
+    public void reset() {
+        elapsed = 0;
+        running = false;
+    }
 }
+
