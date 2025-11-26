@@ -1,5 +1,6 @@
 package code;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 /**
@@ -12,7 +13,6 @@ import javax.swing.JFrame;
  * 				Stopwatch
  */
 public class TestFrame extends JFrame {
-
     private static final long serialVersionUID = 1L;
 
     public static void main(String[] args) {
@@ -30,8 +30,12 @@ public class TestFrame extends JFrame {
         setTitle("StopWatch Test");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        add(new stopWatch());
+        stopWatch sw = new stopWatch();
+        sw.setPreferredSize(new Dimension(400, 300));
+        add(sw);
+
         pack();
-        setLocationRelativeTo(null); 
+        setLocationRelativeTo(null);
     }
 }
+
