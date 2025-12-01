@@ -1,160 +1,129 @@
 package code;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.JButton;
-
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Matthew_Fitzgerald
  * @course CS-2420-001 Algorithms & Data Structures Fall 2025
- * @last_modified Nov 24, 2025
+ * @last_modified Nov 26, 2025
  * @assignment Team Project:
  *              Algorithm Racing
- * @description Jpanel Component stopwatch-timer
+ * @description live timer for use with JFrame
  */
 public class stopWatch extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private Timer stopwatchTimer = new Timer(); // live timer
+    private Timer stopwatchTimer = new Timer(); 
     private boolean running = false;
+    private String algorithm = "default";   
 
-    private JLabel timeVal; // display timer
-    private JButton toggle; // start/stop button
+    private JLabel timeVal;  
+    private JLabel nameLabel;
+    private JButton toggleBtn;
+    protected boolean algorithmEnabled = true;
 
-    public stopWatch() {
+    public static void main(String[] args) {
+        // Use the Swing event dispatch thread
+        SwingUtilities.invokeLater(() -> {
+            // Create the frame
+            JFrame frame = new JFrame("StopWatch Test");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(400, 100);
+            frame.getContentPane().setLayout(new BorderLayout());
 
-        JPanel content = container(); // frame for sub-components
-        add(content);
+            // Create StopWatch instance
+            stopWatch stopwatch = new stopWatch("Algorithm A");
+            stopwatch.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        toggle.addActionListener(e -> {
-            running = !running;
+            // Add the stopwatch to the center of the frame
+            frame.getContentPane().add(stopwatch, BorderLayout.CENTER);
 
-            if (running) {
-                stopwatchTimer.Start();
-                toggle.setText("Stop");
-            } else {
-                stopwatchTimer.Stop();
-                toggle.setText("Start");
-            }
+            // Show the frame
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+
+            // Start the stopwatch for demo
+            stopwatch.Start();
         });
-
-        dynamicTimer();
     }
     
-    /**
-     * create framework for components
-     * @return container with all components 
-     */
-    private JPanel container() {
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.X_AXIS)); 
+    public stopWatch(String name) {
 
-        JPanel timePanel = timer(content); // timer framework
-        content.add(timePanel);
-        
-        JPanel btnPanel = buttons(); // buttons framework
-        content.add(btnPanel);
+		this.algorithm = name;
 
-        return content;
-    }
-    
-    /**
-     * framework for timer
-     * @param content upper framework structure
-     * @return timer container with all components
-     */
-    private JPanel timer(JPanel content) {
-        JPanel timePanel = new JPanel();
-        timePanel.setAlignmentY(CENTER_ALIGNMENT);
-        timePanel.setLayout(new GridLayout(1, 2));
-        timePanel.setAlignmentY(CENTER_ALIGNMENT);
-        
-        JLabel timerLabel = label(timePanel); // timer label
-        timePanel.add(timerLabel);
+		// Keep horizontal BoxLayout
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-        timeVal = counter(timePanel); // live time
-        timePanel.add(timeVal);
-        
-        return timePanel;
-    }
+		int minHeight = 28;
+		setMinimumSize(new Dimension(0, minHeight));
+		setPreferredSize(new Dimension(200, minHeight));
+		setMaximumSize(new Dimension(Integer.MAX_VALUE, minHeight));
 
-	/**
-	 * Label component settings
-	 * @param timePanel content upper framework structure
-	 * @return completed JLabel component
-	 */
-	private JLabel label(JPanel timePanel) {
-		JLabel timerLabel = new JLabel("Timer: ");
-        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        timerLabel.setVerticalAlignment(SwingConstants.CENTER);
-        timerLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-        return timerLabel;
+		// ==== TIME PANEL ====
+		// ==== TIME PANEL ====
+		JPanel timePanel = new JPanel();
+		timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.X_AXIS));
+		timePanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+
+		// Timer label
+		JLabel timerLabel = new JLabel("Timer:");
+		timerLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
+		timePanel.add(timerLabel);
+
+		// small horizontal spacing
+		timePanel.add(Box.createHorizontalStrut(5));
+
+		// Time value
+		timeVal = new JLabel("0:00.0000");
+		timeVal.setAlignmentY(Component.CENTER_ALIGNMENT);
+		timePanel.add(timeVal);
+
+		add(timePanel);
+
+		nameLabel = new JLabel(this.algorithm);
+		nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+		nameLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
+		nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+		add(nameLabel);
+
+
+		javax.swing.Timer swingTimer = new javax.swing.Timer(50, e -> updateLabel());
+		swingTimer.start();
 	}
-	
-	/**
-	 * label with live time
-	 * @param timePanel upper framework structure
-	 * @return JLabel with time
-	 */
-	private JLabel counter(JPanel timePanel) {
-        timeVal = new JLabel("0");
-        timeVal.setVerticalAlignment(SwingConstants.CENTER);
-        timeVal.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-        return timeVal;
-    }
-	
-    /**
-     * framework for buttons
-     * @return buttons JPanel with all components
-     */
-	private JPanel buttons() {
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnPanel.setAlignmentY(CENTER_ALIGNMENT);
-        toggle();
-        btnPanel.add(toggle);
-        return btnPanel;
-    }
-	
-    /**
-     * button controler for timer (field)
-     */
-	private void toggle() {
-		toggle = new JButton("Start");
-		toggle.setFocusPainted(false);
-	    toggle.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1)); // slight border
-	    toggle.setContentAreaFilled(true); 
-	    toggle.setContentAreaFilled(true); 
-	    toggle.setPreferredSize(new Dimension(80, 25));
+    
+    public void setNameLabel(String name) {
+        this.algorithm = name;
+        nameLabel.setText(name);
     }
 
-    /**
-     * timer creation and processing (using field)
-     */
-	private void dynamicTimer() {
-        javax.swing.Timer swingTimer = new javax.swing.Timer(100, e -> {
-            double billion = 1_000_000_000.0;
-        		double timeSec = stopwatchTimer.getTime() / billion;
-            long minutes = (long)(timeSec / 60);
-            double seconds = timeSec % 60;
-            timeVal.setText(String.format("%02d:%05.2f", minutes, seconds));
-        });
-        swingTimer.start();
+    private void updateLabel() {
+        double timeSec = stopwatchTimer.getTime() / 1_000_000_000.0;
+        long minutes = (long)(timeSec / 60);
+        double seconds = timeSec % 60;
+        timeVal.setText(String.format("%d:%06.3f", minutes, seconds));
     }
 
     public void Start() {
-        stopwatchTimer.Start(); // start timer
+        running = true;
+        stopwatchTimer.Start();
     }
 
     public void Stop() {
-        stopwatchTimer.Stop(); // stop timer
+        running = false;
+        stopwatchTimer.Stop();
+    }
+
+    public void Reset() {
+        running = false;
+        stopwatchTimer.Stop();
+        stopwatchTimer = new Timer();
+        updateLabel();
+    }
+
+    public double getTimeSeconds() {
+        return stopwatchTimer.getTime() / 1_000_000_000.0;
     }
 }
