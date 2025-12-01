@@ -86,7 +86,7 @@ public class Query extends JFrame {
 	                vertices = Integer.parseInt(input);
 	                System.out.println("Saved vertices: " + vertices);
 
-	                lblNewLabel_1.setText("Enter second value:");
+	                lblNewLabel_1.setText("Enter start vertex");
 	                textField.setText("");
 	                step = 1;
 	            }
@@ -95,7 +95,7 @@ public class Query extends JFrame {
 	                startV = Integer.parseInt(input);
 	                System.out.println("Saved second value: " + startV);
 
-	                lblNewLabel_1.setText("Enter third value:");
+	                lblNewLabel_1.setText("Enter end vertex (not in use):");
 	                textField.setText("");
 	                step = 2;
 	            }
