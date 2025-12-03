@@ -275,7 +275,7 @@ public class MazeVisualizer extends JPanel {
 	private void drawDFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (dfsGraph != null && (showDFS || !dfsFinished)) {
             g2d.setColor(DFS_TRAIL_COLOR);
-            g2d.setStroke(new BasicStroke(2));
+            g2d.setStroke(new BasicStroke(10));
             for (int v = 0; v < dfsGraph.V(); v++) {
                 for (int w : dfsGraph.adj(v)) {
                     if (v < w) {
@@ -308,6 +308,7 @@ public class MazeVisualizer extends JPanel {
 	private void randGraph(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (random != null) {
             g2d.setColor(RANDOM_COLOR);
+            g2d.setStroke(new BasicStroke(10f));
             for (int v = 0; v < random.V(); v++) {
                 for (int w : random.adj(v)) {
                     if (v < w) {
