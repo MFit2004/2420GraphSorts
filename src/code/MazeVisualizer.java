@@ -136,7 +136,7 @@ public class MazeVisualizer extends JPanel {
 
         drawBFS(g2d, leftOffset, topOffset);
 
-        drawEnds(g2d, leftOffset, topOffset);
+        drawRandEnds(g2d, leftOffset, topOffset);
 
         legend(g2d, leftOffset, topOffset);
     }
@@ -146,23 +146,49 @@ public class MazeVisualizer extends JPanel {
 	 * @param leftOffset
 	 * @param topOffset
 	 */
-	private void drawEnds(Graphics2D g2d, int leftOffset, int topOffset) {
-		int[] startCoord = mazeGraph.vertexToCoordinates(startVertex);
-        int[] targetCoord = mazeGraph.vertexToCoordinates(targetVertex);
+	private void drawRandEnds(Graphics2D g2d, int leftOffset, int topOffset) {
+        drawRandStart(g2d, leftOffset, topOffset);
+        drawRandEnd(g2d, leftOffset, topOffset);
+	}
 
-        g2d.setColor(START_COLOR);
-        g2d.fillOval(leftOffset + startCoord[1]*cellSize + 5, topOffset + startCoord[0]*cellSize + 5,
-                cellSize - 10, cellSize - 10);
-        g2d.setColor(Color.WHITE);
-        g2d.drawString("S", leftOffset + startCoord[1]*cellSize + cellSize/2 - 4,
-                topOffset + startCoord[0]*cellSize + cellSize/2 + 5);
-
+	/**
+	 * @param g2d
+	 * @param leftOffset
+	 * @param topOffset
+	 */
+	private void drawRandEnd(Graphics2D g2d, int leftOffset, int topOffset) {
+		int[] targetCoord = mazeGraph.vertexToCoordinates(targetVertex);
         g2d.setColor(TARGET_COLOR);
         g2d.fillOval(leftOffset + targetCoord[1]*cellSize + 5, topOffset + targetCoord[0]*cellSize + 5,
                 cellSize - 10, cellSize - 10);
         g2d.setColor(Color.WHITE);
-        g2d.drawString("T", leftOffset + targetCoord[1]*cellSize + cellSize/2 - 4,
-                topOffset + targetCoord[0]*cellSize + cellSize/2 + 5);
+        String tText = "T";
+        FontMetrics fm = g2d.getFontMetrics();
+        int tWidth = fm.stringWidth(tText);
+        int tHeight = fm.getAscent();
+        g2d.drawString(tText,
+                leftOffset + targetCoord[1]*cellSize + cellSize/2 - tWidth/2,
+                topOffset + targetCoord[0]*cellSize + cellSize/2 + tHeight/2 - 2);
+	}
+
+	/**
+	 * @param g2d
+	 * @param leftOffset
+	 * @param topOffset
+	 */
+	private void drawRandStart(Graphics2D g2d, int leftOffset, int topOffset) {
+		int[] startCoord = mazeGraph.vertexToCoordinates(startVertex);
+        g2d.setColor(START_COLOR);
+        g2d.fillOval(leftOffset + startCoord[1]*cellSize + 5, topOffset + startCoord[0]*cellSize + 5,
+                cellSize - 10, cellSize - 10);
+        g2d.setColor(Color.WHITE);
+        FontMetrics fm = g2d.getFontMetrics();
+        String sText = "S";
+        int sWidth = fm.stringWidth(sText);
+        int sHeight = fm.getAscent();
+        g2d.drawString(sText,
+                leftOffset + startCoord[1]*cellSize + cellSize/2 - sWidth/2,
+                topOffset + startCoord[0]*cellSize + cellSize/2 + sHeight/2 - 2);
 	}
 
 	/**
@@ -242,7 +268,7 @@ public class MazeVisualizer extends JPanel {
 	private void drawBFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (bfsGraph != null && (showBFS || !bfsFinished)) {
             g2d.setColor(BFS_TRAIL_COLOR);
-            g2d.setStroke(new BasicStroke(2));
+            g2d.setStroke(new BasicStroke(4f));
             for (int v = 0; v < bfsGraph.V(); v++) {
                 for (int w : bfsGraph.adj(v)) {
                     if (v < w) {
@@ -275,7 +301,7 @@ public class MazeVisualizer extends JPanel {
 	private void drawDFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (dfsGraph != null && (showDFS || !dfsFinished)) {
             g2d.setColor(DFS_TRAIL_COLOR);
-            g2d.setStroke(new BasicStroke(10));
+            g2d.setStroke(new BasicStroke(4f));
             for (int v = 0; v < dfsGraph.V(); v++) {
                 for (int w : dfsGraph.adj(v)) {
                     if (v < w) {
@@ -308,7 +334,7 @@ public class MazeVisualizer extends JPanel {
 	private void randGraph(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (random != null) {
             g2d.setColor(RANDOM_COLOR);
-            g2d.setStroke(new BasicStroke(10f));
+            g2d.setStroke(new BasicStroke(4f));
             for (int v = 0; v < random.V(); v++) {
                 for (int w : random.adj(v)) {
                     if (v < w) {
