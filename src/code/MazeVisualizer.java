@@ -176,19 +176,9 @@ public class MazeVisualizer extends JPanel {
         int boxSize = 20;
         int spacing = 30;
 
-        g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font("Arial", Font.BOLD, 16));
-        g2d.drawString("Legend:", legendX, legendY);
+        legendLabel(g2d, legendX, legendY);
 
-        g2d.setColor(DFS_COLOR);
-        g2d.fillOval(legendX, legendY + spacing - 15, boxSize, boxSize);
-        g2d.setColor(Color.BLACK);
-        g2d.drawString("DFS Current", legendX + boxSize + 10, legendY + spacing);
-
-        g2d.setColor(DFS_TRAIL_COLOR);
-        g2d.fillRect(legendX, legendY + 2 * spacing - 15, boxSize, boxSize / 2);
-        g2d.setColor(Color.BLACK);
-        g2d.drawString("DFS Trail", legendX + boxSize + 10, legendY + 2 * spacing);
+        legendDFS(g2d, legendX, legendY, boxSize, spacing);
 
         g2d.setColor(BFS_COLOR);
         g2d.fillOval(legendX, legendY + 3 * spacing - 15, boxSize, boxSize);
@@ -200,21 +190,54 @@ public class MazeVisualizer extends JPanel {
         g2d.setColor(Color.BLACK);
         g2d.drawString("BFS Trail", legendX + boxSize + 10, legendY + 4 * spacing);
 
+        g2d.fillRect(legendX, legendY + 5 * spacing - 15, boxSize, boxSize / 2);
+        g2d.drawString("Random Graph", legendX + boxSize + 10, legendY + 5 * spacing);
+        
         g2d.setColor(START_COLOR);
-        g2d.fillOval(legendX, legendY + 5 * spacing - 15, boxSize, boxSize);
-        g2d.setColor(Color.BLACK);
-        g2d.drawString("Start", legendX + boxSize + 10, legendY + 5 * spacing);
-
-        g2d.setColor(TARGET_COLOR);
         g2d.fillOval(legendX, legendY + 6 * spacing - 15, boxSize, boxSize);
         g2d.setColor(Color.BLACK);
-        g2d.drawString("Target", legendX + boxSize + 10, legendY + 6 * spacing);
+        g2d.drawString("Start", legendX + boxSize + 10, legendY + 6 * spacing);
+
+        g2d.setColor(TARGET_COLOR);
+        g2d.fillOval(legendX, legendY + 7 * spacing - 15, boxSize, boxSize);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("Target", legendX + boxSize + 10, legendY + 7 * spacing);
 	}
 
 	/**
 	 * @param g2d
-	 * @param leftOffset
-	 * @param topOffset
+	 * @param legendX
+	 * @param legendY
+	 * @param boxSize
+	 * @param spacing
+	 */
+	private void legendDFS(Graphics2D g2d, int legendX, int legendY, int boxSize, int spacing) {
+		g2d.setColor(DFS_COLOR);
+        g2d.fillOval(legendX, legendY + spacing - 15, boxSize, boxSize);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("DFS Current", legendX + boxSize + 10, legendY + spacing);
+
+        g2d.setColor(DFS_TRAIL_COLOR);
+        g2d.fillRect(legendX, legendY + 2 * spacing - 15, boxSize, boxSize / 2);
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("DFS Trail", legendX + boxSize + 10, legendY + 2 * spacing);
+	}
+
+	/**
+	 * @param g2d graphices to draw
+	 * @param legendX x-cooridinate placement
+	 * @param legendY y-cooridinate placement
+	 */
+	private void legendLabel(Graphics2D g2d, int legendX, int legendY) {
+		g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.drawString("Random Graph items:", legendX, legendY);
+	}
+
+	/**
+	 * @param g2d 2dgraphices to draw
+	 * @param leftOffset x-cooridinate placement
+	 * @param topOffset y-cooridinate placement
 	 */
 	private void drawBFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (bfsGraph != null && (showBFS || !bfsFinished)) {
@@ -245,9 +268,9 @@ public class MazeVisualizer extends JPanel {
 	}
 
 	/**
-	 * @param g2d
-	 * @param leftOffset
-	 * @param topOffset
+	 * @param g2d 2dgraphices to draw
+	 * @param leftOffset x-cooridinate placement
+	 * @param topOffset y-cooridinate placement
 	 */
 	private void drawDFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (dfsGraph != null && (showDFS || !dfsFinished)) {
@@ -278,13 +301,13 @@ public class MazeVisualizer extends JPanel {
 	}
 
 	/**
-	 * @param g2d
-	 * @param leftOffset
-	 * @param topOffset
+	 * @param g2d 2dgraphices to draw
+	 * @param leftOffset x-cooridinate placement
+	 * @param topOffset y-cooridinate placement
 	 */
 	private void randGraph(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (random != null) {
-            g2d.setStroke(new BasicStroke(2));
+            g2d.setColor(RANDOM_COLOR);
             for (int v = 0; v < random.V(); v++) {
                 for (int w : random.adj(v)) {
                     if (v < w) {
@@ -302,7 +325,11 @@ public class MazeVisualizer extends JPanel {
         }
 	}
 
-    public void runDFS(int startIgnored) {
+    /**
+     * draw DFS traversal
+     * @param localStart
+     */
+	public void runDFS(int localStart) {
         Graph g = mazeGraph.getRandomGraph();
         int start = startVertex;
         int target = targetVertex;
