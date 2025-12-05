@@ -21,7 +21,6 @@ public class stopWatch extends JPanel {
 
     private JLabel timeVal;  
     private JLabel nameLabel;
-    private JButton toggleBtn;
     protected boolean algorithmEnabled = true;
 
     public static void main(String[] args) {

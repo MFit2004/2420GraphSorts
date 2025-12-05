@@ -3,19 +3,19 @@ package code;
 import edu.princeton.cs.algs4.Edge;
 import edu.princeton.cs.algs4.EdgeWeightedGraph;
 import edu.princeton.cs.algs4.Graph;
-import edu.princeton.cs.algs4.GraphGenerator;
 import edu.princeton.cs.algs4.StdRandom;
-import edu.princeton.cs.algs4.Stack;
 
 public class MazeGraph {
 	private Graph mazeGraph; // grid with all possible vertices
 	protected Graph randomGraph; // random connections
-	protected EdgeWeightedGraph mstGraph;
+	protected EdgeWeightedGraph mstGraph; // for mst
+	
 	protected int vertices;
 	protected int gridSize;
 	protected int startRand = 0;
 	protected int targetRand = 0;
-	protected int startMST = 0;
+	private int startMST = 0;
+	protected int endMST = 0;
 	private int maxRandomVertices; // limit number of random vertices
 
 	/**
@@ -46,7 +46,7 @@ public class MazeGraph {
 	/**
 	 * @goal: random sparse graph for DFS and BFS
 	 * DFS and algs4 inspired algorithm to generate random graph
-	 * generate a random graph from start, pick endpoint from graph
+	 * generate a random graph from start, pick end point from graph
 	 * @param start starting vertex
 	 */
 	public void generateRandomGraph(int start) {
@@ -102,35 +102,39 @@ public class MazeGraph {
 	 * DFS {@link edu.princeton.cs.algs4.DepthFirstSearch} 
 	 * and algs4 inspired algorithm<br> 
 	 * Generate random EdgeWeightedgraph from random start in bounds 
-	 * pick endpoint from graph 
-	 * weights between (0,1000)
+	 * pick end point from graph weights between (0,1000)
 	 */
 	public void generateMSTGraph() {
-		int start = StdRandom.uniformInt(0, maxRandomVertices);
-		mstGraph = new EdgeWeightedGraph(vertices);
-		boolean[] visited = new boolean[vertices];
+	    int randStart = StdRandom.uniformInt(vertices);
+	    this.startMST = randStart;
+
+	    mstGraph = new EdgeWeightedGraph(vertices);
+	    maxRandomVertices = Math.max(2, vertices / 2); 
+
+	    boolean[] visited = new boolean[vertices];
 	    int[] stack = new int[vertices];
 	    int stackSize = 0;
-	    
-	    stack[stackSize++] = start;
-	    visited[start] = true;
+
+	    stack[stackSize++] = randStart;
+	    visited[randStart] = true;
+
 	    int countVisited = 1;
 	    int[] includedVertices = new int[vertices];
 	    int includedCount = 0;
-	    includedVertices[includedCount++] = start;
+	    includedVertices[includedCount++] = randStart;
+
 	    while (stackSize > 0 && countVisited < maxRandomVertices) {
 	        int current = stack[--stackSize];
-	        int degree = vertices - 1;
+
+	        int degree = mazeGraph.degree(current);
 	        int[] neighbors = new int[degree];
 	        int idx = 0;
-	        for (int v = 0; v < vertices; v++) {
-	            if (v != current) {
-	                neighbors[idx++] = v;
-	            }
+	        for (int w : mazeGraph.adj(current)) {
+	            neighbors[idx++] = w;
 	        }
-	        
-	        for (int i = degree - 1; i >= 1; i--) {
-	        		int r = StdRandom.uniformInt(i + 1);
+
+	        for (int i = degree - 1; i > 0; i--) {
+	            int r = StdRandom.uniformInt(i + 1);
 	            int tmp = neighbors[i];
 	            neighbors[i] = neighbors[r];
 	            neighbors[r] = tmp;
@@ -138,28 +142,22 @@ public class MazeGraph {
 
 	        for (int w : neighbors) {
 	            if (!visited[w] && countVisited < maxRandomVertices) {
-	            		int randVal = StdRandom.uniformInt(1000);
-	            		Edge newEdge = new Edge(current, w, randVal);
-	            		mstGraph.addEdge(newEdge);
+	                int weight = StdRandom.uniformInt(1, 1001);
+	                mstGraph.addEdge(new Edge(current, w, weight));
 	                visited[w] = true;
 	                stack[stackSize++] = w;
-	                countVisited++;
+
 	                includedVertices[includedCount++] = w;
+	                countVisited++;
 	            }
 	        }
 	    }
+
 	    int t;
 	    do {
-	    		t = includedVertices[StdRandom.uniformInt(includedCount)];
-	    } while (t == start);
-	    targetRand = t;
-	}
-
-	private void dfsVisit(Graph g, int v, boolean[] visited) {
-	    visited[v] = true;
-	    for (int w : g.adj(v)) {
-	        if (!visited[w]) dfsVisit(g, w, visited);
-	    }
+	        t = includedVertices[StdRandom.uniformInt(includedCount)];
+	    } while (t == randStart);
+	    this.endMST = t;
 	}
 
 	public Graph getMazeGraph() {
@@ -168,6 +166,10 @@ public class MazeGraph {
 
 	public Graph getRandomGraph() {
 		return randomGraph;
+	}
+	
+	public EdgeWeightedGraph getMstGraph() {
+		return mstGraph;
 	}
 
 	public int getVertices() {
@@ -178,12 +180,20 @@ public class MazeGraph {
 		return gridSize;
 	}
 
-	public int getStart() {
+	public int getRandStart() {
 		return startRand;
 	}
 
-	public int getTarget() {
+	public int getRandTarget() {
 		return targetRand;
+	}
+	
+	public int getMSTStart() {
+		return startMST;
+	}
+	
+	public int getMSTTarget() {
+		return endMST;
 	}
 
 	public int[] vertexToCoordinates(int v) {
