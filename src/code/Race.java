@@ -1,240 +1,40 @@
-package a5;
+package graph;
 
-import edu.princeton.cs.algs4.DepthFirstPaths;
-import edu.princeton.cs.algs4.BreadthFirstPaths;
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-
+import javax.swing.JFrame;
+import edu.princeton.cs.algs4.Graph;
+/**
+ * Race represents the Visual elements of the graph race
+ * 
+ * @author Trevor_Austin + Matthew_Fitzgerald
+ */
 public class Race {
-    private class Timer {
-        private long start = 0;
-        private long stop = 0;
-        
-        public void Start() {
-            start = System.nanoTime();
-            stop = 0;
-        }
-        
-        public void Stop() {
-            stop = System.nanoTime();
-        }
-        
-        public long getTime() {
-            if (stop == 0) {
-                return System.nanoTime() - start;
-            }
-            return stop - start;
-        }
-        
-        public double getTimeMillis() {
-            return getTime() / 1_000_000.0;
-        }
-    }
-    
-    private Timer timer;
-    private Statistics dfsStats;
-    private Statistics bfsStats;
-    private MazeGraph graph;
-    
-    private int startVertex;
-    private int targetVertex;
-    
     private MazeVisualizer visualizer;
-    private JFrame frame;
+    private int RandStart;
     
-    public Race(int vertices, int start, int target) {
+    private MazeGraph graph;
+
+    public Race(int vertices) {
         this.graph = new MazeGraph(vertices);
-        this.startVertex = start;
-        this.targetVertex = target;
-        this.timer = new Timer();
-        this.dfsStats = new Statistics();
-        this.bfsStats = new Statistics();
+        graph.generateRandomGraph(RandStart);
+        this.RandStart = graph.getRandStart();
+        graph.generateMSTGraph();
     }
-    
-    public void Start() {
-        System.out.println("Starting Algorithm Race...");
-        graph.displayMaze();
-        System.out.println("Start vertex: " + startVertex);
-        System.out.println("Target vertex: " + targetVertex);
-        
-        setupVisualization();
-        
-        DepthFirstPaths dfs = new DepthFirstPaths(graph.getGraph(), startVertex);
-        BreadthFirstPaths bfs = new BreadthFirstPaths(graph.getGraph(), startVertex);
-        
-        List<Integer> dfsPath = new ArrayList<>();
-        List<Integer> bfsPath = new ArrayList<>();
-        
-        if (dfs.hasPathTo(targetVertex)) {
-            for (int v : dfs.pathTo(targetVertex)) {
-                dfsPath.add(v);
-            }
-        }
-        
-        if (bfs.hasPathTo(targetVertex)) {
-            for (int v : bfs.pathTo(targetVertex)) {
-                bfsPath.add(v);
-            }
-        }
-        
-        visualizer.setDFSPath(dfsPath);
-        visualizer.setBFSPath(bfsPath);
-        
-        System.out.println("\nBoth algorithms racing simultaneously...\n");
-        
-        timer.Start();
-        
-        Thread dfsThread = new Thread(() -> runDFSVisual(dfsPath));
-        Thread bfsThread = new Thread(() -> runBFSVisual(bfsPath));
-        
-        dfsThread.start();
-        bfsThread.start();
-        
-        try {
-            dfsThread.join();
-            bfsThread.join();
-        } catch (InterruptedException e) {
-            System.err.println("Race interrupted: " + e.getMessage());
-        }
-        
-        timer.Stop();
-        
-        System.out.println("\nRace Complete!");
-        displayResults();
-    }
-    
-    private void setupVisualization() {
-        frame = new JFrame("Algorithm Racer - DFS vs BFS");
-        visualizer = new MazeVisualizer(graph, startVertex, targetVertex);
-        
+
+    public void setupVisualization() {
+        visualizer = new MazeVisualizer(graph);
+        visualizer.setDFSGraph(new Graph(graph.getVertices())); 
+        visualizer.setBFSGraph(new Graph(graph.getVertices())); 
+
+        JFrame frame = new JFrame("Maze Race");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(visualizer);
         frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
-    
-    private void runDFSVisual(List<Integer> path) {
-        dfsStats.startTimer();
-        dfsStats.startDistance();
-        
-        for (int i = 0; i < path.size(); i++) {
-            dfsStats.incrementVerticesVisited();
-            
-            if (i > 0) {
-                dfsStats.addDistance(1);
-                dfsStats.incrementEdgesChecked();
-            }
-            
-            SwingUtilities.invokeLater(() -> visualizer.advanceDFS());
-            
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        
-        dfsStats.setMoves(path.size() - 1);
-        dfsStats.stopTimer();
-        System.out.println("🔴 DFS finished!");
-    }
-    
-    private void runBFSVisual(List<Integer> path) {
-        bfsStats.startTimer();
-        bfsStats.startDistance();
-        
-        for (int i = 0; i < path.size(); i++) {
-            bfsStats.incrementVerticesVisited();
-            
-            if (i > 0) {
-                bfsStats.addDistance(1);
-                bfsStats.incrementEdgesChecked();
-            }
-            
-            SwingUtilities.invokeLater(() -> visualizer.advanceBFS());
-            
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        
-        bfsStats.setMoves(path.size() - 1);
-        bfsStats.stopTimer();
-        System.out.println("🔵 BFS finished!");
-    }
-    
-    private void displayResults() {
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("           ALGORITHM RACE RESULTS");
-        System.out.println("=".repeat(50));
-        
-        dfsStats.display("Depth-First Search (DFS)");
-        bfsStats.display("Breadth-First Search (BFS)");
-        
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("Total Race Time: " + timer.getTime() + " ns (" 
-                          + timer.getTimeMillis() + " ms)");
-        System.out.println("=".repeat(50));
-        
-        compareResults();
-        announceWinner();
-    }
-    
-    private void compareResults() {
-        System.out.println("\n=== COMPARISON ===");
-        
-        if (dfsStats.getTime() < bfsStats.getTime()) {
-            double diff = (bfsStats.getTime() - dfsStats.getTime()) / 1_000_000.0;
-            System.out.println("Faster: DFS by " + diff + " ms");
-        } else {
-            double diff = (dfsStats.getTime() - bfsStats.getTime()) / 1_000_000.0;
-            System.out.println("Faster: BFS by " + diff + " ms");
-        }
-        
-        if (dfsStats.getMoves() < bfsStats.getMoves()) {
-            System.out.println("Shorter Path: DFS (" + dfsStats.getMoves() + " moves vs " + bfsStats.getMoves() + " moves)");
-        } else if (bfsStats.getMoves() < dfsStats.getMoves()) {
-            System.out.println("Shorter Path: BFS (" + bfsStats.getMoves() + " moves vs " + dfsStats.getMoves() + " moves)");
-        } else {
-            System.out.println("Same Path Length: " + dfsStats.getMoves() + " moves");
-        }
-        
-        if (dfsStats.getVerticesVisited() < bfsStats.getVerticesVisited()) {
-            System.out.println("Fewer Vertices Visited: DFS (" + dfsStats.getVerticesVisited() + " vs " + bfsStats.getVerticesVisited() + ")");
-        } else {
-            System.out.println("Fewer Vertices Visited: BFS (" + bfsStats.getVerticesVisited() + " vs " + dfsStats.getVerticesVisited() + ")");
-        }
-    }
-    
-    private void announceWinner() {
-        System.out.println("\n" + "=".repeat(50));
-        if (dfsStats.getTime() < bfsStats.getTime()) {
-            System.out.println("🏆 WINNER: DFS (Finished First!)");
-        } else if (bfsStats.getTime() < dfsStats.getTime()) {
-            System.out.println("🏆 WINNER: BFS (Finished First!)");
-        } else {
-            System.out.println("🏆 TIE! Both algorithms finished simultaneously!");
-        }
-        System.out.println("=".repeat(50));
-    }
-    
-    public Statistics getDFSStats() {
-        return dfsStats;
-    }
-    
-    public Statistics getBFSStats() {
-        return bfsStats;
-    }
-    
-    public long getTotalTime() {
-        return timer.getTime();
-    }
-    
-    public MazeGraph getMazeGraph() {
-        return graph;
+       
+
+        visualizer.runDFS(RandStart);
+        visualizer.runBFS(RandStart);
+        visualizer.runKruskal();
+        visualizer.runPrim(RandStart);
     }
 }
