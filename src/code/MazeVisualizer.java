@@ -190,7 +190,7 @@ public class MazeVisualizer extends JPanel {
 				int y = topOffsetAlgs + row * cellSize;
 				g2d.setColor(Color.WHITE);
 				g2d.fillRect(x, y, cellSize, cellSize);
-				g2d.setColor(WALL_COLOR);
+				g2d.setColor(Color.WHITE);
 				g2d.drawRect(x, y, cellSize, cellSize);
 			}
 		}
@@ -212,23 +212,49 @@ public class MazeVisualizer extends JPanel {
 	 * @param topOffset  y-cooridinate placement
 	 */
 	private void randGraph(Graphics2D g2d, int leftOffset, int topOffset) {
-		if (random != null) {
-			g2d.setColor(RANDOM_COLOR);
-			g2d.setStroke(BOLD_STROKE);
-			for (int v = 0; v < random.V(); v++) {
-				for (int w : random.adj(v)) {
-					if (v < w) {
-						int[] from = mazeGraph.vertexToCoordinates(v);
-						int[] to = mazeGraph.vertexToCoordinates(w);
-						g2d.drawLine(leftOffset + from[1] * cellSize + cellSize / 2 - 4,
-								topOffset + from[0] * cellSize + cellSize / 2 - 4,
-								leftOffset + to[1] * cellSize + cellSize / 2 - 4,
-								topOffset + to[0] * cellSize + cellSize / 2 - 4);
-					}
-				}
-			}
-		}
+	    if (random != null) {
+	        g2d.setColor(RANDOM_COLOR);
+	        g2d.setStroke(BOLD_STROKE);
+	        
+	        int dotSize = 10; // diameter of the dot
+	        Set<Integer> drawnVertices = new HashSet<>(); // track which vertices already got a dot
+
+	        for (int v = 0; v < random.V(); v++) {
+	            for (int w : random.adj(v)) {
+	                // Draw dot for v if not already drawn
+	                if (!drawnVertices.contains(v)) {
+	                    int[] from = mazeGraph.vertexToCoordinates(v);
+	                    int dotX = leftOffset + from[1] * cellSize + cellSize / 2 - dotSize / 2;
+	                    int dotY = topOffset + from[0] * cellSize + cellSize / 2 - dotSize / 2;
+	                    g2d.fillOval(dotX, dotY, dotSize, dotSize);
+	                    drawnVertices.add(v);
+	                }
+
+	                // Draw dot for w if not already drawn
+	                if (!drawnVertices.contains(w)) {
+	                    int[] to = mazeGraph.vertexToCoordinates(w);
+	                    int dotX = leftOffset + to[1] * cellSize + cellSize / 2 - dotSize / 2;
+	                    int dotY = topOffset + to[0] * cellSize + cellSize / 2 - dotSize / 2;
+	                    g2d.fillOval(dotX, dotY, dotSize, dotSize);
+	                    drawnVertices.add(w);
+	                }
+
+	                // Draw the edge
+	                if (v < w) { // avoid drawing the same edge twice
+	                    int[] from = mazeGraph.vertexToCoordinates(v);
+	                    int[] to = mazeGraph.vertexToCoordinates(w);
+	                    g2d.drawLine(
+	                        leftOffset + from[1] * cellSize + cellSize / 2,
+	                        topOffset + from[0] * cellSize + cellSize / 2,
+	                        leftOffset + to[1] * cellSize + cellSize / 2,
+	                        topOffset + to[0] * cellSize + cellSize / 2
+	                    );
+	                }
+	            }
+	        }
+	    }
 	}
+
 	
 	/**
 	 * display edges of (future) MST graph
@@ -237,37 +263,55 @@ public class MazeVisualizer extends JPanel {
 	 * @param topOffset
 	 */
 	private void MSTGraph(Graphics2D g2d, int leftOffset, int topOffset) {
-		
-		if (MST != null) {
-			g2d.setColor(MST_COLOR);
-			g2d.setStroke(BOLD_STROKE);
-			for (Edge e : MST.edges()) { 
-				int v = e.either();
-				int w = e.other(v);
-				String weight = String.format("%.0f", e.weight());
-				
-				int[] from = mazeGraph.vertexToCoordinates(v);
-				int[] to = mazeGraph.vertexToCoordinates(w);
-				
-				int x1 = leftOffset + from[1] * cellSize + cellSize / 2 + 6;
-				int y1 = topOffset + from[0] * cellSize + cellSize / 2 + 6;
-				int x2 = leftOffset + to[1] * cellSize + cellSize / 2 + 6;
-				int y2 = topOffset + to[0] * cellSize + cellSize / 2 + 6;
-				int midX = (x1 + x2) / 2;
-			    int midY = (y1 + y2) / 2;
-				
-				g2d.drawLine(x1, y1, x2, y2);
-				g2d.setColor(Color.BLACK);
-				g2d.setFont(new Font("Arial", Font.BOLD, 10));
-			    g2d.drawString(weight, midX, midY);
-			    g2d.setColor(MST_COLOR);
-				
-			}
-		}
-		else {
-			System.out.println("MST fails");
-		}
+	    if (MST != null) {
+	        g2d.setColor(MST_COLOR);
+	        g2d.setStroke(BOLD_STROKE);
+	        int circleSize = 10; // diameter of the circle
+
+	        Set<Integer> drawnVertices = new HashSet<>(); // track which vertices already got a circle
+
+	        for (Edge e : MST.edges()) { 
+	            int v = e.either();
+	            int w = e.other(v);
+	            String weight = String.format("%.0f", e.weight());
+
+	            // Draw unfilled circle for v if not already drawn
+	            if (!drawnVertices.contains(v)) {
+	                int[] coords = mazeGraph.vertexToCoordinates(v);
+	                int x = leftOffset + coords[1] * cellSize + cellSize / 2 - circleSize / 2;
+	                int y = topOffset + coords[0] * cellSize + cellSize / 2 - circleSize / 2;
+	                g2d.drawOval(x, y, circleSize, circleSize);
+	                drawnVertices.add(v);
+	            }
+
+	            // Draw unfilled circle for w if not already drawn
+	            if (!drawnVertices.contains(w)) {
+	                int[] coords = mazeGraph.vertexToCoordinates(w);
+	                int x = leftOffset + coords[1] * cellSize + cellSize / 2 - circleSize / 2;
+	                int y = topOffset + coords[0] * cellSize + cellSize / 2 - circleSize / 2;
+	                g2d.drawOval(x, y, circleSize, circleSize);
+	                drawnVertices.add(w);
+	            }
+
+	            // Draw the edge
+	            int[] from = mazeGraph.vertexToCoordinates(v);
+	            int[] to = mazeGraph.vertexToCoordinates(w);
+	            int x1 = leftOffset + from[1] * cellSize + cellSize / 2 + 6;
+	            int y1 = topOffset + from[0] * cellSize + cellSize / 2 + 6;
+	            int x2 = leftOffset + to[1] * cellSize + cellSize / 2 + 6;
+	            int y2 = topOffset + to[0] * cellSize + cellSize / 2 + 6;
+	            int midX = (x1 + x2) / 2;
+	            int midY = (y1 + y2) / 2;
+
+	            g2d.drawLine(x1, y1, x2, y2);
+	            g2d.setColor(Color.BLACK);
+	            g2d.setFont(new Font("Arial", Font.BOLD, 10));
+	            g2d.drawString(weight, midX, midY);
+	            g2d.setColor(MST_COLOR);
+	        }
+	    }
 	}
+
 	
 	/**
 	 * draw DFS progress live
@@ -277,7 +321,7 @@ public class MazeVisualizer extends JPanel {
 	 */
 	private void drawDFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (dfsGraph != null && (showDFS || !dfsFinished)) {
-			g2d.setColor(DFS_TRAIL_COLOR);
+			g2d.setColor(DFS_COLOR);
 			g2d.setStroke(BOLD_STROKE);
 			for (int v = 0; v < dfsGraph.V(); v++) {
 				for (int w : dfsGraph.adj(v)) {
@@ -309,7 +353,7 @@ public class MazeVisualizer extends JPanel {
 	 */
 	private void drawBFS(Graphics2D g2d, int leftOffset, int topOffset) {
 		if (bfsGraph != null && (showBFS || !bfsFinished)) {
-			g2d.setColor(BFS_TRAIL_COLOR);
+			g2d.setColor(BFS_COLOR);
 			g2d.setStroke(BOLD_STROKE);
 			for (int v = 0; v < bfsGraph.V(); v++) {
 				for (int w : bfsGraph.adj(v)) {
@@ -431,7 +475,7 @@ public class MazeVisualizer extends JPanel {
 
 		g2d.setStroke(BOLD_STROKE);
 
-		g2d.setColor(KRUSKAL_TRAIL);
+		g2d.setColor(KRUSKAL_COLOR);
 		for (Edge e : kruskalGraph.edges()) {
 			int v = e.either();
 			int w = e.other(v);
@@ -467,7 +511,7 @@ public class MazeVisualizer extends JPanel {
 
 	    g2d.setStroke(BOLD_STROKE);
 
-	    g2d.setColor(PRIM_TRAIL);
+	    g2d.setColor(PRIM_COLOR);
 	    for (Edge e : primGraph.edges()) {
 	        int v = e.either();
 	        int w = e.other(v);
@@ -544,7 +588,7 @@ public class MazeVisualizer extends JPanel {
 		int spacing = 30;
 
 		legendTitle(g2d, legendX, legendY);
-		vertexLabel(g2d, legendX, legendY, spacing);
+		//vertexLabel(g2d, legendX, legendY, spacing);
 		RandGLbl(g2d, legendX, legendY, spacing);		
 		legendDFS(g2d, legendX, legendY, boxSize, spacing);
 		legendBFS(g2d, legendX, legendY, boxSize, spacing);
@@ -807,6 +851,7 @@ public class MazeVisualizer extends JPanel {
 	/**
 	 * find path of travel for Kruskal algorithm
 	 */
+	
 	public void runKruskal() {
 		EdgeWeightedGraph g = mazeGraph.getMstGraph();
 		kruskalGraph = new EdgeWeightedGraph(g.V());
@@ -891,14 +936,13 @@ public class MazeVisualizer extends JPanel {
 	public void runPrim(int start) {
 	    EdgeWeightedGraph g = mazeGraph.getMstGraph();
 	    primGraph = new EdgeWeightedGraph(g.V());
-	    primFinished = false;
 
 	    boolean[] marked = new boolean[g.V()];
 	    MinPQ<Edge> pq = new MinPQ<>();
 	    primIndex = start;
 
 	    markAndInsertEdges(start, g, marked, pq);
-
+	    //primTimer.Reset();
 	    new Thread(() -> {
 
 	    	SwingUtilities.invokeLater(() -> {
@@ -926,13 +970,13 @@ public class MazeVisualizer extends JPanel {
 	            int r = vCoord[0];
 	            int c = vCoord[1];
 
-	            // Move row-by-row
 	            while (r != wCoord[0]) {
 	                primIndex = mazeGraph.coordinatesToVertex(r, c);
 	                SwingUtilities.invokeLater(this::repaint);
 
-	                try { Thread.sleep(refreshRate); }
-	                catch (InterruptedException ignored) {}
+	                try {
+	                    Thread.sleep(refreshRate);
+	                } catch (InterruptedException ignored) {}
 
 	                r += (wCoord[0] > r) ? 1 : -1;
 	            }
@@ -941,8 +985,9 @@ public class MazeVisualizer extends JPanel {
 	                primIndex = mazeGraph.coordinatesToVertex(r, c);
 	                SwingUtilities.invokeLater(this::repaint);
 
-	                try { Thread.sleep(refreshRate); }
-	                catch (InterruptedException ignored) {}
+	                try {
+	                    Thread.sleep(refreshRate);
+	                } catch (InterruptedException ignored) {}
 
 	                c += (wCoord[1] > c) ? 1 : -1;
 	            }
@@ -950,17 +995,23 @@ public class MazeVisualizer extends JPanel {
 	            primIndex = next;
 	            SwingUtilities.invokeLater(this::repaint);
 
-	            try { Thread.sleep(refreshRate); }
-	            catch (InterruptedException ignored) {}
+	            try {
+	                Thread.sleep(refreshRate);
+	            } catch (InterruptedException ignored) {}
+
 	            markAndInsertEdges(next, g, marked, pq);
 	        }
 
+	        SwingUtilities.invokeLater(() -> {
+	            primTimer.Stop();
+	            repaint();
+	        });
+	        
 	        primFinished = true;
-	        primTimer.Stop();
-	        SwingUtilities.invokeLater(this::repaint);
 
 	    }).start();
 	}
+
 	
 	private void markAndInsertEdges(int v, EdgeWeightedGraph g,
 	                                boolean[] marked, MinPQ<Edge> pq) {

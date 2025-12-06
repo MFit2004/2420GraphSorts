@@ -6,7 +6,7 @@ import java.awt.*;
 /**
  * @author Matthew_Fitzgerald
  * @course CS-2420-001 Algorithms & Data Structures Fall 2025
- * @last_modified Nov 26, 2025
+ * @last modified November 26, 2025
  * @assignment Team Project:
  *              Algorithm Racing
  * @description live timer for use with JFrame
@@ -17,7 +17,8 @@ public class stopWatch extends JPanel {
 
     private Timer stopwatchTimer = new Timer(); 
     private boolean running = false;
-    private String algorithm = "default";   
+
+	private String algorithm = "default";   
 
     private JLabel timeVal;  
     private JLabel nameLabel;
@@ -36,14 +37,14 @@ public class stopWatch extends JPanel {
             stopWatch stopwatch = new stopWatch("Algorithm A");
             stopwatch.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            // Add the stopwatch to the center of the frame
+            // Add the stop watch to the center of the frame
             frame.getContentPane().add(stopwatch, BorderLayout.CENTER);
 
             // Show the frame
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
 
-            // Start the stopwatch for demo
+            // Start the stop watch for demo
             stopwatch.Start();
         });
     }
