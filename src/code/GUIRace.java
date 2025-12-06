@@ -1,3 +1,5 @@
+package code;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -51,10 +53,12 @@ public class GUIRace extends JFrame {
 		JPanel racePanel = new JPanel();
 		mainPane.add(racePanel, BorderLayout.CENTER);
 		racePanel.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JPanel race1 = new JPanel();
-		racePanel.add(race1);
+		// Graph, start vertex, target vertex
+		GUI_TimeTrial timeTrial = new GUI_TimeTrial();
+		//MazeVisualizer race1 = new MazeVisualizer(timeTrial, 10, 10);
+		/*racePanel.add(race1);
 		race1.setLayout(new GridLayout(1, 0, 0, 0));
+		*/
 		
 		JPanel race2 = new JPanel();
 		racePanel.add(race2);
